@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Touch Stay — Freemium Strategy Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1117;
+  --s1: #161b25;
+  --s2: #1d2333;
+  --s3: #242b3d;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.11);
+  --text: #e2e8f0;
+  --text2: #94a3b8;
+  --text3: #64748b;
+  --teal: #2dd4bf;
+  --teal-bg: rgba(45,212,191,0.08);
+  --teal-border: rgba(45,212,191,0.2);
+  --red: #f87171;
+  --red-bg: rgba(248,113,113,0.07);
+  --red-border: rgba(248,113,113,0.22);
+  --amber: #fbbf24;
+  --amber-bg: rgba(251,191,36,0.07);
+  --amber-border: rgba(251,191,36,0.2);
+  --blue: #60a5fa;
+  --blue-bg: rgba(96,165,250,0.08);
+  --blue-border: rgba(96,165,250,0.2);
+  --purple: #a78bfa;
+  --purple-bg: rgba(167,139,250,0.08);
+  --r: 8px;
+  --r-sm: 5px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.55; }
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+.page { max-width: 1200px; margin: 0 auto; padding: 28px 24px 60px; }
+
+.hdr { margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border2); display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+.hdr-left h1 { font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.hdr-left p { font-size: 12px; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
+.verdict { background: var(--red-bg); border: 1px solid var(--red-border); color: var(--red); font-size: 11px; font-weight: 600; padding: 6px 14px; border-radius: 20px; white-space: nowrap; font-family: 'JetBrains Mono', monospace; flex-shrink: 0; }
+
+.sec { margin-bottom: 24px; }
+.sec-title { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--text3); margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+.sec-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.kpi { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 16px; }
+.kpi.danger { background: var(--red-bg); border-color: var(--red-border); }
+.kpi.warn { background: var(--amber-bg); border-color: var(--amber-border); }
+.kpi.ok { background: var(--teal-bg); border-color: var(--teal-border); }
+.kpi-label { font-size: 11px; color: var(--text3); margin-bottom: 6px; line-height: 1.35; }
+.kpi-val { font-size: 22px; font-weight: 600; font-family: 'JetBrains Mono', monospace; color: var(--text); }
+.kpi.danger .kpi-val { color: var(--red); }
+.kpi.warn .kpi-val { color: var(--amber); }
+.kpi.ok .kpi-val { color: var(--teal); }
+.kpi-sub { font-size: 11px; color: var(--text3); margin-top: 3px; }
+
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+.card { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r); padding: 16px 18px; }
+.card-hd { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--text3); margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+
+.feat-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.feat-table th { background: var(--s2); color: var(--text3); font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--border2); }
+.feat-table th.free-col { color: var(--text2); }
+.feat-table th.starter-col { color: var(--teal); }
+.feat-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text2); }
+.feat-table tr:last-child td { border-bottom: none; }
+.feat-table tr.cat-row td { background: var(--s2); font-size: 10px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--text3); padding: 6px 12px; }
+.feat-table td.center { text-align: center; }
+.feat-table tr:hover td { background: rgba(255,255,255,0.015); }
+.y { color: var(--teal); font-weight: 600; font-size: 13px; }
+.n { color: var(--text3); font-size: 13px; }
+.lim { color: var(--amber); font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 500; }
+.forced { color: var(--red); font-size: 11px; font-weight: 500; font-family: 'JetBrains Mono', monospace; }
+.new-tag { font-size: 9px; font-weight: 600; background: var(--teal-bg); color: var(--teal); border: 1px solid var(--teal-border); border-radius: 3px; padding: 1px 5px; letter-spacing: .04em; vertical-align: middle; margin-left: 5px; }
+
+.bars { display: flex; flex-direction: column; gap: 8px; }
+.bar-r { display: flex; align-items: center; gap: 9px; }
+.bar-lbl { font-size: 11px; color: var(--text2); width: 68px; text-align: right; flex-shrink: 0; }
+.bar-track { flex: 1; height: 20px; background: var(--s2); border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; }
+.bar-fill span { font-size: 10px; font-weight: 500; white-space: nowrap; font-family: 'JetBrains Mono', monospace; }
+.bar-mrr { width: 76px; text-align: right; font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text3); flex-shrink: 0; }
+
+.dt { width: 100%; border-collapse: collapse; font-size: 12px; }
+.dt th { background: var(--s2); color: var(--text3); font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--border2); }
+.dt td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text2); vertical-align: middle; line-height: 1.4; }
+.dt tr:last-child td { border-bottom: none; }
+.dt tr.warn-r td { background: var(--amber-bg); }
+.dt tr.danger-r td { background: var(--red-bg); }
+.dt tr.ok-r td { background: var(--teal-bg); }
+.dt td.right { text-align: right; }
+.dt td.center { text-align: center; }
+.dt td b { color: var(--text); font-weight: 600; }
+.teal { color: var(--teal); }
+.amber { color: var(--amber); }
+.red { color: var(--red); }
+.blue { color: var(--blue); }
+
+.insight-list { display: flex; flex-direction: column; gap: 9px; }
+.ins { display: flex; gap: 11px; padding: 11px 14px; border-radius: var(--r-sm); border: 1px solid var(--border); align-items: flex-start; }
+.ins.crit { background: var(--red-bg); border-color: var(--red-border); }
+.ins.warn { background: var(--amber-bg); border-color: var(--amber-border); }
+.ins.info { background: var(--blue-bg); border-color: var(--blue-border); }
+.ins.ok { background: var(--teal-bg); border-color: var(--teal-border); }
+.ins.str { background: var(--purple-bg); border-color: rgba(167,139,250,0.2); }
+.ins-tag { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 3px 7px; border-radius: 3px; flex-shrink: 0; margin-top: 1px; font-family: 'JetBrains Mono', monospace; }
+.ins.crit .ins-tag { background: rgba(248,113,113,0.15); color: var(--red); }
+.ins.warn .ins-tag { background: rgba(251,191,36,0.15); color: var(--amber); }
+.ins.info .ins-tag { background: rgba(96,165,250,0.15); color: var(--blue); }
+.ins.ok .ins-tag { background: rgba(45,212,191,0.15); color: var(--teal); }
+.ins.str .ins-tag { background: rgba(167,139,250,0.15); color: var(--purple); }
+.ins-body { flex: 1; }
+.ins-title { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.ins-desc { font-size: 12px; color: var(--text2); line-height: 1.55; }
+
+.be-cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.be-card { border-radius: var(--r); padding: 14px 16px; border: 1px solid var(--border); background: var(--s1); }
+.be-card.pes { background: var(--red-bg); border-color: var(--red-border); }
+.be-card.base { background: var(--s2); }
+.be-card.opt { background: var(--teal-bg); border-color: var(--teal-border); }
+.be-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 12px; }
+.be-card.pes .be-label { color: var(--red); }
+.be-card.base .be-label { color: var(--text3); }
+.be-card.opt .be-label { color: var(--teal); }
+.be-stat { margin-bottom: 8px; }
+.be-k { font-size: 10px; color: var(--text3); margin-bottom: 2px; }
+.be-v { font-size: 16px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+.be-card.pes .be-v { color: var(--red); }
+.be-card.base .be-v { color: var(--text); }
+.be-card.opt .be-v { color: var(--teal); }
+.be-note { font-size: 11px; color: var(--text3); margin-top: 10px; line-height: 1.5; border-top: 1px solid var(--border); padding-top: 10px; }
+
+.pitfall-row { display: flex; gap: 11px; padding: 10px 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
+.pitfall-row:last-child { border-bottom: none; }
+.sev { font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; padding: 2px 8px; border-radius: 3px; flex-shrink: 0; min-width: 46px; text-align: center; margin-top: 2px; }
+.sev.high { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+.sev.med { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+.pitfall-txt { flex: 1; font-size: 12px; color: var(--text2); line-height: 1.55; }
+.pitfall-txt strong { color: var(--text); font-weight: 600; display: block; margin-bottom: 2px; }
+
+.dual-bar-wrap { margin: 6px 0; }
+.dual-lbl { display: flex; justify-content: space-between; font-size: 10px; color: var(--text3); margin-bottom: 3px; }
+.dual-track { height: 5px; background: var(--s2); border-radius: 3px; overflow: hidden; margin-bottom: 2px; }
+.dual-fill { height: 100%; border-radius: 3px; }
+
+.summary-box { background: var(--s1); border: 1px solid var(--border2); border-radius: var(--r); padding: 16px 20px; margin-top: 8px; font-size: 12px; color: var(--text2); line-height: 1.7; }
+.summary-box strong { color: var(--text); font-weight: 600; }
+
+.callout { padding: 9px 12px; border-radius: var(--r-sm); font-size: 11px; color: var(--text2); line-height: 1.5; margin-top: 10px; }
+.callout.red { background: var(--red-bg); border: 1px solid var(--red-border); }
+.callout.amber { background: var(--amber-bg); border: 1px solid var(--amber-border); }
+.callout.teal { background: var(--teal-bg); border: 1px solid var(--teal-border); }
+.callout.blue { background: var(--blue-bg); border: 1px solid var(--blue-border); }
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-left">
+    <h1>Freemium Strategy Dashboard</h1>
+    <p>Touch Stay · Free plan feasibility · April 2026 · 9,437 accounts · $161,953 MRR</p>
+  </div>
+  <div class="verdict">⚠ High structural risk — read before deciding</div>
+</div>
+
+<!-- 1. KEY NUMBERS -->
+<div class="sec">
+  <div class="sec-title">Key numbers</div>
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-label">Total paying accounts</div>
+      <div class="kpi-val">9,437</div>
+      <div class="kpi-sub">Current active base</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Total MRR</div>
+      <div class="kpi-val">$161,953</div>
+      <div class="kpi-sub">Monthly recurring revenue</div>
+    </div>
+    <div class="kpi danger">
+      <div class="kpi-label">Accounts eligible for Free (1 GB)</div>
+      <div class="kpi-val">58.1%</div>
+      <div class="kpi-sub">5,484 accounts — all on Starter</div>
+    </div>
+    <div class="kpi danger">
+      <div class="kpi-label">MRR directly at downgrade risk</div>
+      <div class="kpi-val">$55,646</div>
+      <div class="kpi-sub">34.4% of total MRR</div>
+    </div>
+    <div class="kpi warn">
+      <div class="kpi-label">New MRR at risk per month</div>
+      <div class="kpi-val">$1,118</div>
+      <div class="kpi-sub">42% of $2,661 new MRR</div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. FEATURE COMPARISON -->
+<div class="sec">
+  <div class="sec-title">Free vs Starter — feature comparison</div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="feat-table" style="width:100%">
+      <thead>
+        <tr>
+          <th style="width:55%">Feature</th>
+          <th class="free-col" style="width:22.5%;text-align:center">Free · $0 · 1 GB · 1 seat · English only</th>
+          <th class="starter-col" style="width:22.5%;text-align:center">Starter · $8.25/mo · unlimited GBs · 2 seats</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="cat-row"><td colspan="3">Guidebook</td></tr>
+        <tr><td>Guest view (PWA)</td><td class="center"><span class="y">✓</span></td><td class="center"><span class="y">✓</span></td></tr>
+        <tr><td>Guide creation (URL / manual / AI)</td><td class="center"><span class="y">✓</span></td><td class="center"><span class="y">✓</span></td></tr>
+        <tr><td>Branding control — logo, colors, fonts</td><td class="center"><span class="n">✗</span></td><td class="center"><span class="y">✓</span></td></tr>
+        <tr><td>Touch Stay badge on guide footer</td><td class="center"><span class="forced">forced on</span></td><td class="center"><span class="n">removed</span></td></tr>
+        <tr><td>Local recommendations + Google Places</td><td class="center"><span class="y">✓</span></td><td class="center"><span class="y">✓</span></td></tr>
+        <tr><td>Language support</td><td class="center"><span class="lim">English only</span></td><td class="center"><span class="y">✓ multi-language</span></td></tr>
+        <tr><td>Variables / dynamic text</td><td class="center"><span class="n">✗</span></td><td class="center"><span class="y">✓</span></td></tr>
+        <tr><td>QR code links</td><td class="center"><span class="y">✓</span></td><td class="center"><span class="y">✓</span></td></tr>
+        <tr><td>Guidebook count</td><td class="center"><span class="lim">1 max</span></td><td class="center"><span class="y">unlimited</span></td></tr>
+        <tr><td>Guidebook duplication / cloning <span class="new-tag">new lever</span></td><td class="center"><span class="n">✗</span></td><td class="center"><span class="y">✓</span></td></tr>
+
+        <tr class="cat-row"><td colspan="3">Guest management</td></tr>
+        <tr><td>Invitations / guest-specific links</td><td class="center"><span class="y">✓</span></td><td class="center"><span class="y">✓</span></td></tr>
+        <tr><td>Time-based guidebook access (until departure)</td><td class="center"><span class="n">✗ — always open</span></td><td class="center"><span class="y">✓</span></td></tr>
+        <tr><td>PMS / booking data sync</td><td class="center"><span class="y">✓</span></td><td class="center"><span class="y">✓</span></td></tr>
+        <tr><td>Contacts DB / CRM</td><td class="center"><span class="n">✗</span></td><td class="center"><span class="n">✗ <span style="font-size:10px;color:var(--text3)">(hidden)</span></span></td></tr>
+        <tr><td>Contact collection in guide</td><td class="center"><span class="n">✗</span></td><td class="center"><span class="n">✗</span></td></tr>
+        <tr><td>Export contacts</td><td class="center"><span class="n">✗</span></td><td class="center"><span class="n">✗</span></td></tr>
+
+        <tr class="cat-row"><td colspan="3">Messaging</td></tr>
+        <tr><td>Scheduled emails</td><td class="center"><span class="y">✓ unlimited</span></td><td class="center"><span class="y">✓ unlimited</span></td></tr>
+        <tr><td>Email template library</td><td class="center"><span class="lim">2 shown &amp; accessible</span></td><td class="center"><span class="y">✓ full library</span></td></tr>
+        <tr><td>Scheduled SMS</td><td class="center"><span class="n">✗</span></td><td class="center"><span class="n">✗</span></td></tr>
+        <tr><td>Two-way messaging</td><td class="center"><span class="n">✗</span></td><td class="center"><span class="n">✗</span></td></tr>
+        <tr><td>AI chatbot</td><td class="center"><span class="lim">3 resolved / mo</span></td><td class="center"><span class="n">✗</span></td></tr>
+
+        <tr class="cat-row"><td colspan="3">AI content assistant</td></tr>
+        <tr><td>AI writing / content generation</td><td class="center"><span class="lim">3 prompts / day</span></td><td class="center"><span class="y">✓ unlimited</span></td></tr>
+
+        <tr class="cat-row"><td colspan="3">Store (e-commerce)</td></tr>
+        <tr><td>Sell products / services</td><td class="center"><span class="y">✓</span></td><td class="center"><span class="y">✓</span></td></tr>
+        <tr><td>Orders + payments</td><td class="center"><span class="y">✓</span></td><td class="center"><span class="y">✓</span></td></tr>
+        <tr><td>Platform commission</td><td class="center"><span class="lim">20–25%</span></td><td class="center"><span class="y">~2%</span></td></tr>
+        <tr><td>Store dashboard</td><td class="center"><span class="n">✗</span></td><td class="center"><span class="n">✗</span></td></tr>
+
+        <tr class="cat-row"><td colspan="3">Analytics</td></tr>
+        <tr><td>Guidebook analytics</td><td class="center"><span class="n">✗</span></td><td class="center"><span class="y">✓</span></td></tr>
+        <tr><td>Weekly engagement digest email <span class="new-tag">new lever</span></td><td class="center"><span class="n">✗</span></td><td class="center"><span class="y">✓</span></td></tr>
+
+        <tr class="cat-row"><td colspan="3">Team</td></tr>
+        <tr><td>Team seats</td><td class="center"><span class="lim">1</span></td><td class="center"><span class="lim">2</span></td></tr>
+        <tr><td>Support SLA</td><td class="center"><span class="lim">48h</span></td><td class="center"><span class="lim">12h</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 3. CURRENT USER BASE -->
+<div class="sec">
+  <div class="sec-title">Current user base structure</div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-hd">Accounts &amp; MRR by guidebook count</div>
+      <div class="bars">
+        <div class="bar-r">
+          <div class="bar-lbl">1 GB</div>
+          <div class="bar-track"><div class="bar-fill" style="width:58.1%;background:rgba(248,113,113,0.3)"><span style="color:#fca5a5">5,484 accts · 58.1%</span></div></div>
+          <div class="bar-mrr" style="color:var(--red)">$55,646</div>
+        </div>
+        <div class="bar-r">
+          <div class="bar-lbl">2–3 GBs</div>
+          <div class="bar-track"><div class="bar-fill" style="width:23.5%;background:rgba(251,191,36,0.25)"><span style="color:#fde68a">2,218 · 23.5%</span></div></div>
+          <div class="bar-mrr">$32,852</div>
+        </div>
+        <div class="bar-r">
+          <div class="bar-lbl">4–5 GBs</div>
+          <div class="bar-track"><div class="bar-fill" style="width:6.5%;background:rgba(45,212,191,0.18)"><span style="color:var(--teal);font-size:9px">610</span></div></div>
+          <div class="bar-mrr">$13,452</div>
+        </div>
+        <div class="bar-r">
+          <div class="bar-lbl">6–10 GBs</div>
+          <div class="bar-track"><div class="bar-fill" style="width:6%;background:rgba(96,165,250,0.22)"><span style="color:var(--blue);font-size:9px">564</span></div></div>
+          <div class="bar-mrr">$18,666</div>
+        </div>
+        <div class="bar-r">
+          <div class="bar-lbl">11–20 GBs</div>
+          <div class="bar-track"><div class="bar-fill" style="width:3.5%;background:rgba(96,165,250,0.3)"><span style="color:var(--blue);font-size:9px">331</span></div></div>
+          <div class="bar-mrr">$18,527</div>
+        </div>
+        <div class="bar-r">
+          <div class="bar-lbl">21+ GBs</div>
+          <div class="bar-track"><div class="bar-fill" style="width:2.4%;background:rgba(96,165,250,0.4)"><span style="color:var(--blue);font-size:9px">230</span></div></div>
+          <div class="bar-mrr">$22,810</div>
+        </div>
+      </div>
+      <div style="margin-top:14px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+        <div style="background:var(--s2);border-radius:var(--r-sm);padding:8px 10px"><div style="font-size:10px;color:var(--text3);margin-bottom:3px">Median GBs</div><div style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:14px">1</div></div>
+        <div style="background:var(--s2);border-radius:var(--r-sm);padding:8px 10px"><div style="font-size:10px;color:var(--text3);margin-bottom:3px">Mean GBs</div><div style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:14px">3.1</div></div>
+        <div style="background:var(--s2);border-radius:var(--r-sm);padding:8px 10px"><div style="font-size:10px;color:var(--text3);margin-bottom:3px">Avg MRR 1-GB</div><div style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:14px;color:var(--amber)">$10.15</div></div>
+        <div style="background:var(--s2);border-radius:var(--r-sm);padding:8px 10px"><div style="font-size:10px;color:var(--text3);margin-bottom:3px">1-GB all on</div><div style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:14px;color:var(--red)">Starter</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">MRR concentration — inverted value pyramid</div>
+      <table class="dt">
+        <thead>
+          <tr><th>Band</th><th>Accounts</th><th>% accts</th><th>MRR</th><th>% MRR</th><th>Avg MRR</th></tr>
+        </thead>
+        <tbody>
+          <tr><td style="color:var(--red)"><b>1 GB</b></td><td class="mono">5,484</td><td class="mono red">58.1%</td><td class="mono red">$55,646</td><td class="mono red">34.4%</td><td class="mono amber">$10.15</td></tr>
+          <tr><td>2–3 GBs</td><td class="mono">2,218</td><td class="mono">23.5%</td><td class="mono">$32,852</td><td class="mono">20.3%</td><td class="mono">$14.81</td></tr>
+          <tr><td>4–5 GBs</td><td class="mono">610</td><td class="mono">6.5%</td><td class="mono">$13,452</td><td class="mono">8.3%</td><td class="mono">$22.05</td></tr>
+          <tr><td>6–10 GBs</td><td class="mono">564</td><td class="mono">6.0%</td><td class="mono">$18,666</td><td class="mono">11.5%</td><td class="mono">$33.10</td></tr>
+          <tr><td>11–20 GBs</td><td class="mono">331</td><td class="mono">3.5%</td><td class="mono">$18,527</td><td class="mono">11.4%</td><td class="mono">$55.97</td></tr>
+          <tr><td>21+ GBs</td><td class="mono">230</td><td class="mono">2.4%</td><td class="mono">$22,810</td><td class="mono">14.1%</td><td class="mono">$99.17</td></tr>
+        </tbody>
+      </table>
+      <div class="callout red" style="margin-top:12px">
+        <strong style="color:var(--red)">Why this is a structurally weak base for freemium:</strong><br>
+        Freemium is financially viable when paid users have high enough ARPU that a small conversion rate (2–5%) generates substantial revenue to subsidise the free tier. Here, 58% of accounts pay only $10.15/mo on average — barely above the floor. There is almost no pricing headroom. Compared to a healthy freemium product (Starter ARPU of $30–50+), TS needs conversion rates 3× higher just to generate equivalent revenue per free user. The top 5.9% of accounts (6+ GBs) generate 37% of MRR at $33–99/mo — <em>those</em> are the accounts that could carry a free tier. The 1-GB majority cannot. Launching freemium here means the accounts you're trying to subsidise are almost as cheap as the free users you're trying to convert.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. ACQUISITION FUNNEL -->
+<div class="sec">
+  <div class="sec-title">1 month acquisition funnel — 171 new clients · $2,661 new MRR</div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-hd">New clients by guidebook count</div>
+      <div class="bars">
+        <div class="bar-r">
+          <div class="bar-lbl">1 GB</div>
+          <div class="bar-track"><div class="bar-fill" style="width:67.3%;background:rgba(248,113,113,0.3)"><span style="color:#fca5a5">115 clients · 67.3%</span></div></div>
+          <div class="bar-mrr" style="color:var(--red)">$1,118</div>
+        </div>
+        <div class="bar-r">
+          <div class="bar-lbl">2–3 GBs</div>
+          <div class="bar-track"><div class="bar-fill" style="width:17%;background:rgba(45,212,191,0.18)"><span style="color:var(--teal)">29 · 17%</span></div></div>
+          <div class="bar-mrr">$460</div>
+        </div>
+        <div class="bar-r">
+          <div class="bar-lbl">4–5 GBs</div>
+          <div class="bar-track"><div class="bar-fill" style="width:5.8%;background:rgba(45,212,191,0.25)"><span style="color:var(--teal);font-size:9px">10</span></div></div>
+          <div class="bar-mrr">$220</div>
+        </div>
+        <div class="bar-r">
+          <div class="bar-lbl">6–10 GBs</div>
+          <div class="bar-track"><div class="bar-fill" style="width:6.4%;background:rgba(96,165,250,0.25)"><span style="color:var(--blue);font-size:9px">11</span></div></div>
+          <div class="bar-mrr">$351</div>
+        </div>
+        <div class="bar-r">
+          <div class="bar-lbl">11+ GBs</div>
+          <div class="bar-track"><div class="bar-fill" style="width:3.5%;background:rgba(96,165,250,0.35)"><span style="color:var(--blue);font-size:9px">6</span></div></div>
+          <div class="bar-mrr">$513</div>
+        </div>
+      </div>
+      <div style="margin-top:14px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+        <div style="background:var(--s2);border-radius:var(--r-sm);padding:8px 10px"><div style="font-size:10px;color:var(--text3);margin-bottom:3px">1-GB annual</div><div style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:14px;color:var(--amber)">86 (75%)</div></div>
+        <div style="background:var(--s2);border-radius:var(--r-sm);padding:8px 10px"><div style="font-size:10px;color:var(--text3);margin-bottom:3px">1-GB monthly</div><div style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:14px">29 (25%)</div></div>
+        <div style="background:var(--s2);border-radius:var(--r-sm);padding:8px 10px"><div style="font-size:10px;color:var(--text3);margin-bottom:3px">Avg 1-GB MRR</div><div style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:14px;color:var(--red)">$9.72</div></div>
+        <div style="background:var(--s2);border-radius:var(--r-sm);padding:8px 10px"><div style="font-size:10px;color:var(--text3);margin-bottom:3px">Safe MRR (2+ GB)</div><div style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:14px;color:var(--teal)">$1,543</div></div>
+      </div>
+      <div class="callout red">
+        <strong style="color:var(--red)">Critical pattern:</strong> The new-client funnel skews even harder toward 1-GB (67.3%) than the existing base (58.1%). The structural imbalance is accelerating, not stabilising, with each month of new acquisition.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">Freemium impact on new MRR</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div style="background:var(--teal-bg);border:1px solid var(--teal-border);border-radius:var(--r-sm);padding:12px 14px">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Safe new MRR — 2+ GBs</div>
+          <div style="font-size:20px;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--teal);margin:4px 0">$1,543</div>
+          <div style="font-size:10px;color:var(--text3)">58% of new MRR · untouched</div>
+        </div>
+        <div style="background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--r-sm);padding:12px 14px">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px">At-risk new MRR — 1 GB</div>
+          <div style="font-size:20px;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--red);margin:4px 0">$1,118</div>
+          <div style="font-size:10px;color:var(--text3)">42% · goes $0 if all choose Free</div>
+        </div>
+      </div>
+      <div style="margin-bottom:12px">
+        <div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Annualised new MRR scenarios</div>
+        <div class="dual-bar-wrap">
+          <div class="dual-lbl"><span>Without freemium (baseline)</span><span style="color:var(--text)">$31,936 / yr</span></div>
+          <div class="dual-track"><div class="dual-fill" style="width:100%;background:rgba(45,212,191,0.4)"></div></div>
+        </div>
+        <div class="dual-bar-wrap">
+          <div class="dual-lbl"><span>Worst case — 0% CR</span><span style="color:var(--red)">$18,516 / yr (−$13,420)</span></div>
+          <div class="dual-track"><div class="dual-fill" style="width:58%;background:rgba(248,113,113,0.45)"></div></div>
+        </div>
+        <div class="dual-bar-wrap">
+          <div class="dual-lbl"><span>Optimistic — 10x sign-ups, 3% CR</span><span style="color:var(--teal)">$31,936+ / yr</span></div>
+          <div class="dual-track"><div class="dual-fill" style="width:100%;background:rgba(45,212,191,0.2);border:1px dashed rgba(45,212,191,0.4)"></div></div>
+        </div>
+      </div>
+      <div class="callout amber">
+        <strong style="color:var(--amber)">Critical question:</strong> Does removing the paywall bring 10x more sign-ups? At current volume you need a 12% Free→Starter CR to break even. Typical B2B SaaS PLG benchmarks are 2–5%.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. BREAK-EVEN -->
+<div class="sec">
+  <div class="sec-title">Break-even analysis — 50% Starter · 40% Growth · 10% Pro/Enterprise conversion mix</div>
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">
+    <div style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:12px">Blended ARPU — converted user</div>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:2px">50% Starter × $8.25</div>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:2px">40% Growth × $11.58</div>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:8px">10% Pro × $13.25</div>
+      <div style="font-size:24px;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--amber)">$10.08 / mo</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px;line-height:1.4">Almost identical to current 1-GB Starter avg MRR of $10.15 — the conversion mix barely changes the unit economics.</div>
+    </div>
+    <div style="background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--r);padding:14px 16px">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--red);margin-bottom:12px">New MRR break-even</div>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:2px">Monthly new MRR at risk</div>
+      <div style="font-size:16px;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--red);margin-bottom:8px">$1,118 / mo</div>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:2px">Conversions needed at $10.08</div>
+      <div style="font-size:20px;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--red)">111 / mo</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:6px;line-height:1.4">Achievable only if Free brings 1,150+ sign-ups/mo at 10% CR — near top of B2B PLG benchmarks.</div>
+    </div>
+    <div style="background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--r);padding:14px 16px">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--red);margin-bottom:12px">Combined break-even (new MRR + 15% downgrade)</div>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:2px">Total monthly risk</div>
+      <div style="font-size:16px;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--red);margin-bottom:8px">$9,465 / mo</div>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:2px">Conversions needed at $10.08</div>
+      <div style="font-size:20px;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--red)">939 / mo</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:6px;line-height:1.4">Mathematically unreachable from subscription revenue alone at any realistic sign-up volume.</div>
+    </div>
+  </div>
+
+  <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
+    <table class="dt">
+      <thead>
+        <tr>
+          <th style="width:18%">Free sign-ups / mo</th>
+          <th style="width:8%;text-align:center">CR</th>
+          <th style="width:12%;text-align:right">Conversions</th>
+          <th style="width:12%;text-align:right">Revenue added</th>
+          <th style="width:15%;text-align:right">vs new MRR loss</th>
+          <th style="width:15%;text-align:right">vs combined risk</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>171 <span style="font-size:10px;color:var(--text3)">(current paid vol.)</span></td><td class="center mono">2%</td><td class="right mono">3</td><td class="right mono">$34</td><td class="right mono red">−$1,084</td><td class="right mono red">−$9,431</td><td><span style="color:var(--red);font-size:11px">Loss on both</span></td></tr>
+        <tr><td>500</td><td class="center mono">2%</td><td class="right mono">10</td><td class="right mono">$101</td><td class="right mono red">−$1,017</td><td class="right mono red">−$9,364</td><td><span style="color:var(--red);font-size:11px">Loss on both</span></td></tr>
+        <tr><td>500</td><td class="center mono">5%</td><td class="right mono">25</td><td class="right mono">$252</td><td class="right mono red">−$866</td><td class="right mono red">−$9,213</td><td><span style="color:var(--red);font-size:11px">Loss on both</span></td></tr>
+        <tr><td>500</td><td class="center mono">10%</td><td class="right mono">50</td><td class="right mono">$504</td><td class="right mono red">−$614</td><td class="right mono red">−$8,961</td><td><span style="color:var(--red);font-size:11px">Loss on both</span></td></tr>
+        <tr><td>1,150 <span style="font-size:10px;color:var(--text3)">(10x sign-ups)</span></td><td class="center mono">2%</td><td class="right mono">23</td><td class="right mono">$232</td><td class="right mono red">−$886</td><td class="right mono red">−$9,233</td><td><span style="color:var(--red);font-size:11px">Loss on both</span></td></tr>
+        <tr><td>1,150</td><td class="center mono">5%</td><td class="right mono">58</td><td class="right mono">$580</td><td class="right mono red">−$539</td><td class="right mono red">−$8,885</td><td><span style="color:var(--red);font-size:11px">Loss on both</span></td></tr>
+        <tr class="warn-r"><td>1,150</td><td class="center mono">10%</td><td class="right mono">115</td><td class="right mono">$1,159</td><td class="right mono teal">+$41</td><td class="right mono red">−$8,306</td><td><span style="color:var(--amber);font-size:11px">New MRR break-even only</span></td></tr>
+        <tr class="warn-r"><td>1,150</td><td class="center mono">12%</td><td class="right mono">138</td><td class="right mono">$1,391</td><td class="right mono teal">+$273</td><td class="right mono red">−$8,074</td><td><span style="color:var(--amber);font-size:11px">New MRR break-even only</span></td></tr>
+        <tr><td>2,300 <span style="font-size:10px;color:var(--text3)">(20x sign-ups)</span></td><td class="center mono">2%</td><td class="right mono">46</td><td class="right mono">$464</td><td class="right mono red">−$655</td><td class="right mono red">−$9,001</td><td><span style="color:var(--red);font-size:11px">Loss on both</span></td></tr>
+        <tr class="warn-r"><td>2,300</td><td class="center mono">5%</td><td class="right mono">115</td><td class="right mono">$1,159</td><td class="right mono teal">+$41</td><td class="right mono red">−$8,306</td><td><span style="color:var(--amber);font-size:11px">New MRR break-even only</span></td></tr>
+        <tr class="warn-r"><td>2,300</td><td class="center mono">10%</td><td class="right mono">230</td><td class="right mono">$2,319</td><td class="right mono teal">+$1,201</td><td class="right mono red">−$7,147</td><td><span style="color:var(--amber);font-size:11px">New MRR positive</span></td></tr>
+        <tr><td>5,000 <span style="font-size:10px;color:var(--text3)">(44x sign-ups)</span></td><td class="center mono">2%</td><td class="right mono">100</td><td class="right mono">$1,008</td><td class="right mono red">−$110</td><td class="right mono red">−$8,457</td><td><span style="color:var(--red);font-size:11px">Loss on both</span></td></tr>
+        <tr class="warn-r"><td>5,000</td><td class="center mono">5%</td><td class="right mono">250</td><td class="right mono">$2,520</td><td class="right mono teal">+$1,402</td><td class="right mono red">−$6,945</td><td><span style="color:var(--amber);font-size:11px">New MRR positive</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout red" style="margin-bottom:12px">
+    <strong style="color:var(--red)">The structural problem in numbers:</strong> The blended ARPU of a converted Free user ($10.08) is nearly identical to what current 1-GB Starters pay ($10.15). A healthy freemium product has blended ARPU of $30–50+, meaning a 3% CR yields $0.90–$1.50 per free user per month. TS at 3% CR yields $0.30 per free user. TS needs <strong style="color:var(--red)">4× more free users</strong> than a typical freemium SaaS just to generate the same revenue per sign-up. The combined risk ($9,465/mo) is <strong style="color:var(--red)">mathematically unreachable</strong> from subscription CR alone — the combined break-even requires 939 conversions/month, which at 10x sign-ups (1,150/mo) would demand a 81.6% CR. Store commission must carry the majority of the recovery.
+  </div>
+
+  <div class="card" style="padding:0;overflow:hidden">
+    <table class="dt">
+      <thead>
+        <tr><th>Downgrade scenario — existing 1-GB Starters (5,484 accounts)</th><th>Accounts</th><th>MRR lost / mo</th><th>MRR lost / yr</th><th>% total MRR</th><th>Assessment</th></tr>
+      </thead>
+      <tbody>
+        <tr class="ok-r"><td>5% downgrade</td><td class="mono">274</td><td class="mono teal">$2,782</td><td class="mono teal">$33,384</td><td class="mono teal">1.7%</td><td>Manageable if funnel grows. Recoverable within 3 months at 10x sign-ups.</td></tr>
+        <tr class="warn-r"><td>10% downgrade</td><td class="mono">548</td><td class="mono amber">$5,565</td><td class="mono amber">$66,780</td><td class="mono amber">3.4%</td><td>Needs sustained high CR across a large Free user base to offset.</td></tr>
+        <tr class="warn-r"><td><b>15% downgrade — realistic estimate</b></td><td class="mono"><b>823</b></td><td class="mono amber"><b>$8,347</b></td><td class="mono amber"><b>$100,164</b></td><td class="mono amber"><b>5.2%</b></td><td><b>Combined with new MRR loss: −$9,465/mo. Subscription CR alone cannot recover this.</b></td></tr>
+        <tr class="danger-r"><td>20% downgrade</td><td class="mono">1,097</td><td class="mono red">$11,129</td><td class="mono red">$133,548</td><td class="mono red">6.9%</td><td style="color:var(--red)">Emergency. Store commission becomes the only realistic recovery path.</td></tr>
+        <tr class="danger-r"><td>30% downgrade</td><td class="mono">1,645</td><td class="mono red">$16,694</td><td class="mono red">$200,328</td><td class="mono red">10.3%</td><td style="color:var(--red)">Existential. Full quarter of MRR growth wiped. Requires immediate reversal.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="margin-top:12px;padding:12px 14px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r);font-size:11px;color:var(--text2);line-height:1.6">
+    <strong style="color:var(--text)">Store commission as the rescue mechanism:</strong> At avg $30 upsell × 22.5% commission = $6.75 per sale. To cover just the new MRR loss ($1,118/mo) requires <strong style="color:var(--amber)">166 Store transactions/month from Free users</strong>. To cover the combined risk ($9,465/mo) requires <strong style="color:var(--red)">1,402 Store transactions/month</strong>. These are not small numbers for a base of solo 1-property hosts. The Store commission model must be validated against actual transaction data before launch — not assumed.
+  </div>
+</div>
+
+<!-- 6. INSIGHTS -->
+<div class="sec">
+  <div class="sec-title">Insights analysis</div>
+  <div class="insight-list">
+    <div class="ins crit">
+      <span class="ins-tag">Critical</span>
+      <div class="ins-body">
+        <div class="ins-title">Your acquisition funnel is already dominated by the lowest-value segment — freemium exposes it, not fixes it</div>
+        <div class="ins-desc">67% of new clients and 58% of existing accounts are 1-GB users paying median $8.25/mo. This is a structural problem that exists with or without a free plan. Freemium forces the question: is $0 + PLG upside better than $8.25 + the current slow-growth trajectory? The data shows the size of the risk, not the answer.</div>
+      </div>
+    </div>
+    <div class="ins crit">
+      <span class="ins-tag">Critical</span>
+      <div class="ins-body">
+        <div class="ins-title">Free and Starter are dangerously close in delivered value — the gap is thin</div>
+        <div class="ins-desc">Strip branding, cloning, translations, dynamic text, time-based access, analytics, and email templates and Free delivers ~80% of what Starter delivers to a passive 1-property host. A host who built their guide once and rarely edits it has no strong reason to pay $8.25/mo. The upgrade motion depends on multiple soft levers working simultaneously — an optimistic assumption for low-engagement users.</div>
+      </div>
+    </div>
+    <div class="ins crit">
+      <span class="ins-tag">Critical</span>
+      <div class="ins-body">
+        <div class="ins-title">Free has chatbot. Starter doesn't. This breaks the upgrade ladder and orphans Starter</div>
+        <div class="ins-desc">A Free user who hits the 3-chat/month cap and wants more will look at Starter ($8.25/mo), see zero chatbot, and skip directly to Growth ($11.58/mo) — or stay on Free. Starter is bypassed. Unless Starter gets a distinct chatbot feature, it has no compelling reason to exist between Free and Growth for any host who values AI automation.</div>
+      </div>
+    </div>
+    <div class="ins warn">
+      <span class="ins-tag">Warning</span>
+      <div class="ins-body">
+        <div class="ins-title">75% of new 1-GB clients chose annual — the downgrade bomb detonates at renewal</div>
+        <div class="ins-desc">86 of 115 new 1-GB clients last month paid upfront annual. They won't see the Free option until renewal. If Starter's value hasn't been made tangible through the year via weekly digests, cloning workflows, and 2nd-seat usage, the annual renewal moment becomes a concentrated mass-downgrade event. You have 12 months with each cohort to build retention habits — plan for it now.</div>
+      </div>
+    </div>
+    <div class="ins warn">
+      <span class="ins-tag">Warning</span>
+      <div class="ins-body">
+        <div class="ins-title">Store commission model assumes Store usage — which you haven't validated for 1-GB accounts</div>
+        <div class="ins-desc">The 20–25% commission is only a meaningful recovery lever if Free users actively transact. Low-volume 1-GB hosts often have too few guests to make upselling worthwhile. If the 1-GB Starter cohort has low Store adoption today, the commission mechanism generates near zero. Pull Store usage data by GB count before building financial recovery around this assumption.</div>
+      </div>
+    </div>
+    <div class="ins warn">
+      <span class="ins-tag">Warning</span>
+      <div class="ins-body">
+        <div class="ins-title">TS Free being the best free guidebook on the market is also a market-distortion risk</div>
+        <div class="ins-desc">Competitors charge $7–10/mo for products with fewer features than TS Free. Launching a materially better free product doesn't just attract new users — it signals to the entire market that guidebook software should be free, creating pressure on competitors to follow. Once the market shifts to freemium, recovering to paid-first is very difficult. This is a strategic one-way door, not a tactical experiment.</div>
+      </div>
+    </div>
+    <div class="ins str">
+      <span class="ins-tag">Strategic</span>
+      <div class="ins-body">
+        <div class="ins-title">The median GB count of 1 means Free formalises who you already serve — it's not a pivot, it's a reckoning</div>
+        <div class="ins-desc">Half your customers have a single guidebook. Freemium doesn't create a new type of user — it removes the paywall for people who already represent your majority profile. The question isn't whether to serve 1-GB hosts. You already do. The question is whether $0 + commission + PLG growth velocity beats $8.25 + current churn + stagnant acquisition. That is a bet on growth rate, not on product-market fit.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7. METRICS -->
+<div class="sec">
+  <div class="sec-title">Metrics to track from day one</div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <table class="dt">
+      <thead>
+        <tr><th style="width:26%">Metric</th><th style="width:20%">Target / alert threshold</th><th style="width:8%;text-align:center">Priority</th><th>Why it matters</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>Existing 1-GB Starter downgrade rate</b></td>
+          <td class="mono red">Alert if &gt;5% in month 1</td>
+          <td class="center"><span style="color:var(--red);font-weight:700">P0</span></td>
+          <td>$55,646 MRR directly exposed. Monitor weekly. Every 1% = ~$556 MRR permanently lost from a base that may not be recovered.</td>
+        </tr>
+        <tr>
+          <td><b>Free sign-ups / month</b></td>
+          <td class="mono">&gt;500 mo 1 · &gt;1,000 mo 3</td>
+          <td class="center"><span style="color:var(--red);font-weight:700">P0</span></td>
+          <td>If volume doesn't multiply significantly vs current 171 paid/mo, the funnel assumption fails. No volume means no PLG case at all — freemium was just a price cut.</td>
+        </tr>
+        <tr>
+          <td><b>Free → Starter CR (30-day cohort)</b></td>
+          <td class="mono">&gt;5% at 30d · &gt;12% at 90d</td>
+          <td class="center"><span style="color:var(--red);font-weight:700">P0</span></td>
+          <td>The entire break-even model rests on this number. Below 2% at 90 days means the model is failing and levers need immediate tightening or freemium should be reconsidered.</td>
+        </tr>
+        <tr>
+          <td><b>New paid MRR from 1-GB segment</b></td>
+          <td class="mono amber">Watch: drops below $700/mo</td>
+          <td class="center"><span style="color:var(--amber);font-weight:700">P1</span></td>
+          <td>If new paid 1-GB MRR collapses entirely, all new 1-GB prospects are choosing Free. Worst-case new MRR scenario confirmed. Signals that upgrade levers are failing at acquisition.</td>
+        </tr>
+        <tr>
+          <td><b>Store commission revenue from Free users</b></td>
+          <td class="mono">&gt;$500/mo by month 2</td>
+          <td class="center"><span style="color:var(--amber);font-weight:700">P1</span></td>
+          <td>The passive recovery mechanism. If Free hosts don't transact in the Store, the commission model generates nothing and a key financial assumption of the freemium model is invalidated.</td>
+        </tr>
+        <tr>
+          <td><b>Free activation rate (guide live + guest invited)</b></td>
+          <td class="mono">&gt;60% within 7 days</td>
+          <td class="center"><span style="color:var(--amber);font-weight:700">P1</span></td>
+          <td>Inactive free users never convert. Low activation means a broken onboarding funnel, not a pricing problem. Treat separately from conversion rate analysis.</td>
+        </tr>
+        <tr>
+          <td><b>Free guide guest views / month</b></td>
+          <td class="mono">&gt;20% MoM growth</td>
+          <td class="center"><span style="color:var(--text3);font-weight:700">P2</span></td>
+          <td>The PLG flywheel proxy. More guest views = more TS badge exposure = more organic host word-of-mouth. If this stagnates, the viral loop isn't working.</td>
+        </tr>
+        <tr>
+          <td><b>Time to first upgrade — Free cohort</b></td>
+          <td class="mono">Median &lt;45 days</td>
+          <td class="center"><span style="color:var(--text3);font-weight:700">P2</span></td>
+          <td>Long time-to-upgrade signals weak levers. Use to identify which specific gap (branding, templates, analytics, 2nd seat) is actually driving conversion decisions.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 8. DANGERS -->
+<div class="sec">
+  <div class="sec-title">Dangers and pitfalls</div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-hd" style="color:var(--red)">High severity</div>
+      <div class="pitfall-row">
+        <span class="sev high">HIGH</span>
+        <div class="pitfall-txt">
+          <strong>Annual renewal is a concentrated downgrade event waiting to happen</strong>
+          75% of new 1-GB clients chose annual. In 12 months, every one of them sees the Free option at renewal. If Starter's value hasn't been made tangible through the year, renewals become a mass-downgrade moment hitting all at once rather than spread across months.
+        </div>
+      </div>
+      <div class="pitfall-row">
+        <span class="sev high">HIGH</span>
+        <div class="pitfall-txt">
+          <strong>Starter is the orphan tier — chatbot on Free, not on Starter</strong>
+          Any Free user who wants more chatbot skips Starter entirely and goes to Growth. A tier that exists only as a price point — not a distinct value point — will have chronically low CR. Starter needs either chatbot lite or another unambiguous differentiator to justify its position.
+        </div>
+      </div>
+      <div class="pitfall-row">
+        <span class="sev high">HIGH</span>
+        <div class="pitfall-txt">
+          <strong>No Store usage data by tier — commission recovery is a blind assumption</strong>
+          If 1-GB Starter accounts rarely use the Store today (plausible for low-volume hosts), the 20–25% commission generates near-zero revenue and the financial recovery model is missing a critical input.
+        </div>
+      </div>
+      <div class="pitfall-row">
+        <span class="sev high">HIGH</span>
+        <div class="pitfall-txt">
+          <strong>Freemium is a strategic one-way door — it resets market price expectations permanently</strong>
+          Once TS offers a free plan, competitors face pressure to follow. Once the market normalises free guidebooks, recovering to paid-first pricing is extremely difficult. This is not a reversible experiment — it is a permanent repositioning of what the market believes guidebook software should cost.
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hd" style="color:var(--amber)">Medium severity</div>
+      <div class="pitfall-row">
+        <span class="sev med">MED</span>
+        <div class="pitfall-txt">
+          <strong>Passive hosts — the exact at-risk cohort — feel almost none of the upgrade levers</strong>
+          AI prompt caps, cloning, analytics, and template limits are only felt by active hosts who revisit and refine their guide. A host who set up their guide once and sends emails occasionally hits zero friction on Free. For this cohort, the only real levers are the TS badge, the 2nd seat, and the 1-GB cap — and only one of those (the 2nd seat) is triggered by normal usage.
+        </div>
+      </div>
+      <div class="pitfall-row">
+        <span class="sev med">MED</span>
+        <div class="pitfall-txt">
+          <strong>The 10x sign-up assumption is unvalidated for a niche B2B product</strong>
+          Consumer apps reliably see volume multipliers from freemium. B2B niche SaaS in a specific vertical (STR) is different — hosts discover tools through PMS integrations and community recommendations, not organic search virality. Hostfully has had a free tier for years and is not known for explosive PLG growth as a result.
+        </div>
+      </div>
+      <div class="pitfall-row">
+        <span class="sev med">MED</span>
+        <div class="pitfall-txt">
+          <strong>Guide cloning doesn't exist yet — a key Starter lever is missing at launch</strong>
+          One of the strongest pull levers for Starter (guidebook duplication) is not currently built. Launching Free without it weakens the Starter upgrade story from day one. Hosts who would feel the gap can't feel it if the feature doesn't exist on Starter either.
+        </div>
+      </div>
+      <div class="pitfall-row">
+        <span class="sev med">MED</span>
+        <div class="pitfall-txt">
+          <strong>Free support cost is real and unbudgeted</strong>
+          Potentially 5,000+ Free users generating even 5% support volume per quarter = 250+ tickets at $0 revenue. A Free-tier support policy (community-first, async-only, strict 48h cap) must be defined before launch — not after CS is overwhelmed with zero-revenue accounts.
+        </div>
+      </div>
+      <div class="pitfall-row">
+        <span class="sev med">MED</span>
+        <div class="pitfall-txt">
+          <strong>Template library UX is a conversion decision, not a design decision</strong>
+          Showing 2 accessible templates with the rest visibly greyed and locked creates upgrade motivation. Hiding the locked templates creates nothing. If the implementation team hides rather than shows locked templates, this entire lever disappears silently without anyone noticing.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM LINE -->
+<div class="sec">
+  <div class="sec-title">Bottom line</div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <table class="dt">
+      <thead>
+        <tr><th style="width:22%">Dimension</th><th>Assessment</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>Near-term MRR risk</b></td>
+          <td><span class="red mono">−$9,465/month</span> at realistic assumptions (new MRR loss $1,118 + 15% existing downgrade $8,347). Annualised: <span class="red mono">−$113,580</span> before any PLG upside materialises. This is real money leaving before the growth bet pays off.</td>
+        </tr>
+        <tr>
+          <td><b>Break-even timeline</b></td>
+          <td>At optimistic 10x sign-ups and 3% CR, recovery takes <span class="amber">12–18 months</span>. At realistic 5x sign-ups and 2% CR, the model never breaks even on new MRR alone — Store commission must carry the gap.</td>
+        </tr>
+        <tr>
+          <td><b>What must be true for this to work</b></td>
+          <td>Three things must all be true simultaneously: (1) Free drives significantly more top-of-funnel volume, (2) a meaningful share of Free users convert to Starter within 90 days, (3) Free users transact through the Store at a rate that generates measurable commission. If any one of these fails, the model is loss-making.</td>
+        </tr>
+        <tr>
+          <td><b>Starter tier health</b></td>
+          <td>Starter currently has no chatbot (Free does), no analytics (locked to Growth+), and two unbuilt levers (cloning, version history). Before launching Free, Starter needs to be a genuinely compelling step up — not just a price tier with a slightly better support SLA and a second seat.</td>
+        </tr>
+        <tr>
+          <td><b>Market risk</b></td>
+          <td>Launching the best free guidebook on the market permanently resets price expectations in the STR software segment. This is a one-way strategic door. Competitors will respond. The market will normalise free. <span class="amber">Do this only if you are confident in the PLG playbook — not as an experiment you can reverse.</span></td>
+        </tr>
+        <tr>
+          <td><b>Three pre-launch requirements</b></td>
+          <td>
+            <span class="amber">①</span> <strong>Build guide cloning on Starter</strong> — the strongest pull lever that doesn't yet exist. &nbsp;
+            <span class="amber">②</span> <strong>Pull Store usage data by GB count</strong> — validate that commission recovery is real, not theoretical. &nbsp;
+            <span class="amber">③</span> <strong>Give Starter a chatbot feature</strong> — even 20 resolved/month — so there is a clear, product-level reason to upgrade from Free to Starter rather than going straight to Growth.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
